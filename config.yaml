@@ -1,0 +1,88 @@
+# 測試紀錄
+# 已測試
+# data_dir
+# data1 data_4M4SQAA6Z1A10
+# data2 4DM28OOOOOO
+# data3 4M4COOOOOOOOO
+# data4 4M4SQ8B8N3A11-001
+
+
+# category
+# 
+
+# w
+#[2,3,4] 
+# 
+
+# w_DA
+# [0.1,0.2]
+# 
+
+data :
+  name: MVTec  #MVTec #MTD #VisA 
+  data_dir: C:\data\data_4M4SQAA6Z1A10\data\optical_inspection
+  # c:\dataset\4DM28OOOOOO\data
+   #C:\dataset\data3\data # C:\dataset\data1_used\optical_inspection #"C:\\dataset\\MVTec"#MVTec #VisA #MTD  
+  #  c:\dataset\4DM28OOOOOO\data
+  category: 9CM4001U-Z11 #(FIDUCIALMARK)-S
+  # data2 4DM28OOOOOO
+  # [9U6TP2296020,9U4XC6119020,9R11000R-501,9CM110427X10,9CM1001U-Z21]
+  
+  # data4
+  # [9R4115R05010,9R11015R-501,5D48GSF8CIKC0]
+  # 4M4COOOOOOOOO
+  #data3 NG [9R5215R05011,9R42240R1010,9CM410437X11,9CM40U10-X31]
+  # 9CM40U10-X31 v=10
+  #data1 NG [(FIDUCIALMARK)-S,9R5215R05011,9R4236R05010,9CM40U01-X51,9CM4001U-Z11,5D44GSFACIKF0,GOLD-58.72,]
+  
+
+  image_size: 128 #256
+  batch_size: 32 # 32 for DDAD and 16 for DDADS
+  DA_batch_size: 16 #16 for MVTec and [macaroni2, pcb1] in VisA, and 32 for other categories in VisA
+  test_batch_size: 16 #16 for MVTec, 32 for VisA
+  mask : True 
+  input_channel : 3
+
+
+
+model:
+  still_train : False
+  still_train_load: 50
+  DDADS: False
+  checkpoint_dir: C:\data\data_4M4SQAA6Z1A10\data\optical_inspection #C:\dataset\data3\data\train #C:\dataset\data1_used\optical_inspection  #C:\dataset\MVTec #checkpoints/MVTec   #MTD  #MVTec  #VisA
+  checkpoint_name: weights
+  exp_name: default
+  feature_extractor: wide_resnet101_2 #wide_resnet101_2 #wide_resnet101_2  # wide_resnet50_2 #resnet50
+  learning_rate: 3e-4 
+  weight_decay: 0.05
+  epochs: 250 #250 #3000
+  load_chp : 20 # From this epoch checkpoint will be loaded. Every 250 epochs a checkpoint is saved. Try to load 750 or 1000 epochs for Visa and 1000-1500-2000 for MVTec.
+  DA_epochs: 20 # Number of epochs for Domain adaptation.
+  DA_chp: 20
+  v : 0.2 #heatmap用的   7 # 1 for MVTec and cashew in VisA, and 7 for VisA (1.5 for cashew). Control parameter for pixel-wise and feature-wise comparison. v * D_p + D_f
+  w : 4 #調理函數，每次計算denoise的loss中y和Xt差異的比例權重 ，上一個結果是1 #2 Conditionig parameter. The higher the value, the more the model is conditioned on the target image. "Fine tuninig this parameter results in better performance".
+# 
+
+  w_DA : 4 #3 Resnet的DA loss weight     # Conditionig parameter for domain adaptation. The higher the value, the more the model is conditioned on the target image.
+  DLlambda : 0.1 #和frozen feature比較的mean loss   # 0.1 for MVTec and 0.01 for VisA
+  trajectory_steps: 1000 #1000
+  test_trajectoy_steps: 250 #250   # Starting point for denoining trajectory.
+  test_trajectoy_steps_DA: 250 #250  # Starting point for denoining trajectory for domain adaptation.
+  skip : 25   # Number of steps to skip for denoising trajectory.
+  skip_DA : 25
+  eta : 1 # Stochasticity parameter for denoising process.
+  beta_start : 0.0001
+  beta_end : 0.02 
+  device: 'cuda' #<"cpu", "gpu", "tpu", "ipu">
+  save_model: True
+  num_workers : 1
+  seed : 42
+
+
+
+metrics:
+  is_validation: True
+  auroc: True
+  pro: False
+  misclassifications: True
+  visualisation: True
